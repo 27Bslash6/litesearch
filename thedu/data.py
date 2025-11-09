@@ -61,15 +61,21 @@ def pdf_ingest(
     self: Database,                # thedu database connection
     pdf_doc: dict|os.PathLike,     # a pdf document or path. Use `read_pdf` to read from path
     chunk_embed_pipe:Pipeline=None,# chunking and embedding pipeline. If None, use default chonkie pipeline
-    docs_tbl: str = 'docs',        # docs table name
-    content_tbl: str = 'content',  # content table name
+    tbl: str = 'content',  # content table name
 ):
     'Ingest PDF documents into thedu.'
-    if isinstance(pdf_doc, (str, os.PathLike)): pdf_doc = read_pdf(pdf_doc)
+    path = None
+    if isinstance(pdf_doc, (str, os.PathLike)): path=pdf_doc; pdf_doc = read_pdf(pdf_doc)
     if isinstance(pdf_doc, dict): assert 'pages' in pdf_doc, 'Invalid PDF document dictionary. Use `read_pdf` to read from path.'
     if not chunk_embed_pipe: chunk_embed_pipe = pdf_pipe()
-    self.store(chunk_embed_pipe.run(pymupdf2txt(pdf_doc)).chunks, name=pdf_doc.name, metadata=pdf_doc.metadata,
-               doc_tbl=docs_tbl, content_tbl=content_tbl)
+    content = self.mk_store(tbl)
+    chunks=chunk_embed_pipe.run(pymupdf2txt(pdf_doc)).chunks
+
+    def chunk2con(c):
+        meta = dict(tokens=c.token_count, start_index=c.start_index, end_index=c.end_index, context=c.context, name=pdf_doc.name, path=path, **pdf_doc.metadata)
+        return dict(content=c.text, embedding=c.embedding.tobytes(),metadata=meta)
+
+    content.insert_all(L(chunks).map(chunk2con))
 
 # %% ../nbs/01_data.ipynb 8
 def clean(q:str  # query to be passed for fts search
