@@ -35,12 +35,6 @@ Install latest from the GitHub
 $ pip install git+https://github.com/Karthik777/litesearch.git
 ```
 
-or from [conda](https://anaconda.org/Karthik777/litesearch)
-
-``` sh
-$ conda install -c Karthik777 litesearch
-```
-
 or from [pypi](https://pypi.org/project/litesearch/)
 
 ``` sh
