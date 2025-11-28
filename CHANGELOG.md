@@ -3,6 +3,11 @@ Improved db search, added fast encoding capabilities, coding assistant that you 
 Pypi release for litesearch
 <!-- do not remove -->
 
+## 0.0.5
+
+
+
+
 ## 0.0.4
 
 
